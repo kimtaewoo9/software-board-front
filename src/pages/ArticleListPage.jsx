@@ -1,8 +1,9 @@
+// src/pages/ArticleListPage.jsx
 import React, { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import styled from "styled-components";
-import { fetchArticles } from "../api/articleApi";
+import { fetchArticles, fetchArticlesCount } from "../api/articleApi";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -58,17 +59,17 @@ const CreateButton = styled(Link)`
   }
 `;
 
-const ArticleList = styled.div`
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  overflow: hidden;
+const ArticleTable = styled.div`
+  border-top: 2px solid #000;
+  border-bottom: 1px solid #e9ecef;
 `;
 
-const ArticleItem = styled.div`
-  display: flex;
+const TableRow = styled.div`
+  display: grid;
+  grid-template-columns: 80px 1fr 120px 120px 80px;
   align-items: center;
-  padding: 1rem;
   border-bottom: 1px solid #e9ecef;
+  padding: 0.8rem 0.5rem;
 
   &:last-child {
     border-bottom: none;
@@ -79,49 +80,64 @@ const ArticleItem = styled.div`
   }
 `;
 
-// ArticleId 컴포넌트 제거
+const TableHeader = styled(TableRow)`
+  font-weight: bold;
+  background-color: #f1f3f5;
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #ced4da;
+  color: #495057;
 
-const ArticleContent = styled.div`
-  flex: 1;
+  &:hover {
+    background-color: #f1f3f5;
+  }
+`;
+
+const TableColumn = styled.div`
+  text-align: center;
+  &:nth-child(2) {
+    text-align: left;
+    padding-left: 1rem;
+  }
+`;
+
+const ArticleId = styled.div`
+  text-align: center;
+  color: #868e96;
 `;
 
 const ArticleTitle = styled(Link)`
-  display: block;
-  font-size: 1.1rem;
-  font-weight: bold;
+  font-size: 1rem;
   color: #333;
   text-decoration: none;
-  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
-    color: #0066cc;
+    text-decoration: underline;
   }
 `;
 
-const ArticleMeta = styled.div`
-  font-size: 0.85rem;
-  color: #6c757d;
+const CommentCount = styled.span`
+  color: #dc3545;
+  font-weight: bold;
+  margin-left: 0.25rem;
 `;
 
-// ArticleStats 디자인 수정
-const ArticleStats = styled.div`
-  display: flex;
-  gap: 1rem;
-  margin-left: 1rem;
-  font-size: 0.9rem;
-  color: #6c757d;
-  align-items: center;
+const Writer = styled.div`
+  text-align: center;
+  color: #0066cc;
 `;
 
-const StatItem = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  svg {
-    fill: currentColor;
-    width: 16px;
-    height: 16px;
-  }
+const CreatedAt = styled.div`
+  text-align: center;
+  color: #868e96;
+  font-size: 0.8rem;
+`;
+
+const ViewCount = styled.div`
+  text-align: center;
+  color: #6c757d;
 `;
 
 const PaginationContainer = styled.div`
@@ -149,27 +165,6 @@ const PageButton = styled.button`
   }
 `;
 
-// SVG 아이콘 컴포넌트 추가
-const ViewIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 576 512"
-    fill="currentColor"
-  >
-    <path d="M288 80c-65.2 0-118.8 29.6-159.9 67.6C89.2 182.7 72 234.3 72 288c0 53.7 17.2 105.3 43.1 140.4C169.2 482.4 222.8 512 288 512s118.8-29.6 159.9-67.6C486.8 393.3 504 341.7 504 288c0-53.7-17.2-105.3-43.1-140.4C406.8 109.6 353.2 80 288 80zm0 32a128 128 0 1 1 0 256 128 128 0 1 1 0-256zm0 160a32 32 0 1 0 0-64 32 32 0 1 0 0 64z" />
-  </svg>
-);
-
-const LikeIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 512 512"
-    fill="currentColor"
-  >
-    <path d="M32 448c-17.7 0-32 14.3-32 32s14.3 32 32 32h384c53 0 96-43 96-96V128c0-17.7-14.3-32-32-32s-32 14.3-32 32v224c0 17.7-14.3 32-32 32H32zM128 160c0-35.3 28.7-64 64-64H448c35.3 0 64 28.7 64 64V352c0 35.3-28.7 64-64 64H192c-35.3 0-64-28.7-64-64V160zm112 80V320h64V240c0-17.7-14.3-32-32-32s-32 14.3-32 32z" />
-  </svg>
-);
-
 const ArticleListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "0");
@@ -178,9 +173,22 @@ const ArticleListPage = () => {
 
   const [searchKeyword, setSearchKeyword] = useState(keyword);
 
-  const { data, isLoading, error } = useQuery({
+  const {
+    data: articlesData,
+    isLoading: isArticlesLoading,
+    error: articlesError,
+  } = useQuery({
     queryKey: ["articles", page, size, keyword],
     queryFn: () => fetchArticles(1, page + 1, size),
+  });
+
+  const {
+    data: totalCountData,
+    isLoading: isCountLoading,
+    error: countError,
+  } = useQuery({
+    queryKey: ["articlesCount"],
+    queryFn: () => fetchArticlesCount(1),
   });
 
   const handleSearch = () => {
@@ -191,21 +199,22 @@ const ArticleListPage = () => {
     setSearchParams({ page: String(newPage), size: String(size), keyword });
   };
 
-  if (isLoading)
+  if (isArticlesLoading || isCountLoading)
     return (
       <Container>
         <p>로딩 중...</p>
       </Container>
     );
-  if (error)
+  if (articlesError || countError)
     return (
       <Container>
         <p>게시글을 불러오는 데 실패했습니다.</p>
       </Container>
     );
 
-  const articles = data?.articles ?? [];
-  const totalPages = data?.articleCount ?? 0;
+  const articles = articlesData?.articles ?? [];
+  const totalCount = totalCountData ?? 0;
+  const totalPages = Math.ceil(totalCount / size);
 
   return (
     <Container>
@@ -223,38 +232,39 @@ const ArticleListPage = () => {
         <CreateButton to="/articles/new">글쓰기</CreateButton>
       </SearchBar>
 
-      <ArticleList>
+      <ArticleTable>
+        <TableHeader as="header">
+          <TableColumn>번호</TableColumn>
+          <TableColumn>제목</TableColumn>
+          <TableColumn>글쓴이</TableColumn>
+          <TableColumn>작성일</TableColumn>
+          <TableColumn>조회</TableColumn>
+        </TableHeader>
         {articles.length === 0 ? (
-          <ArticleItem>
-            <p>게시글이 없습니다.</p>
-          </ArticleItem>
+          <TableRow>
+            <TableColumn style={{ gridColumn: "span 5", textAlign: "center" }}>
+              게시글이 없습니다.
+            </TableColumn>
+          </TableRow>
         ) : (
-          articles.map((article) => (
-            <ArticleItem key={article.articleId}>
-              {/* <ArticleId>{article.articleId}</ArticleId> // ID 노출 제거 */}
-              <ArticleContent>
-                <ArticleTitle to={`/articles/${article.articleId}`}>
-                  {article.title}
-                </ArticleTitle>
-                <ArticleMeta>
-                  <span>{article.writerId}</span> ·
-                  <span>
-                    {new Date(article.createdAt).toLocaleDateString()}
-                  </span>
-                </ArticleMeta>
-              </ArticleContent>
-              <ArticleStats>
-                <StatItem>
-                  <ViewIcon /> {article.viewCount}
-                </StatItem>
-                <StatItem>
-                  <LikeIcon /> {article.likeCount}
-                </StatItem>
-              </ArticleStats>
-            </ArticleItem>
+          articles.map((article, index) => (
+            <TableRow key={article.articleId}>
+              <ArticleId>{articles.length - index}</ArticleId>
+              <ArticleTitle to={`/articles/${article.articleId}`}>
+                {article.title}
+                {article.articleCommentCount > 0 && (
+                  <CommentCount>({article.articleCommentCount})</CommentCount>
+                )}
+              </ArticleTitle>
+              <Writer>{article.writerId}</Writer>
+              <CreatedAt>
+                {new Date(article.createdAt).toLocaleDateString()}
+              </CreatedAt>
+              <ViewCount>{article.articleViewCount}</ViewCount>
+            </TableRow>
           ))
         )}
-      </ArticleList>
+      </ArticleTable>
 
       {totalPages > 0 && (
         <PaginationContainer>
