@@ -1,6 +1,6 @@
 // src/components/Footer.jsx
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
 const FooterContainer = styled.footer`
   background-color: #f8f9fa;
@@ -22,12 +22,12 @@ const Copyright = styled.p`
 
 const Links = styled.div`
   margin: 1rem 0;
-  
+
   a {
     color: #6c757d;
     margin: 0 0.5rem;
     text-decoration: none;
-    
+
     &:hover {
       text-decoration: underline;
     }
@@ -36,7 +36,7 @@ const Links = styled.div`
 
 const Footer = () => {
   const year = new Date().getFullYear();
-  
+
   return (
     <FooterContainer>
       <FooterContent>
@@ -45,7 +45,9 @@ const Footer = () => {
           <a href="/privacy">개인정보처리방침</a>
           <a href="/contact">문의하기</a>
         </Links>
-        <Copyright>© {year} KUKE 게시판. All rights reserved.</Copyright>
+        <Copyright>
+          © {year} 국민대학교 소프트웨어 게시판. All rights reserved.
+        </Copyright>
       </FooterContent>
     </FooterContainer>
   );

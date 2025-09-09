@@ -1,10 +1,8 @@
-
-// src/pages/HomePage.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import styled from 'styled-components';
-import { fetchHotArticles } from '../api/articleApi';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import styled from "styled-components";
+import { fetchHotArticles } from "../api/hotArticleApi";
 
 const HomeContainer = styled.div`
   max-width: 1200px;
@@ -40,7 +38,7 @@ const Button = styled(Link)`
   text-decoration: none;
   border-radius: 4px;
   font-weight: bold;
-  
+
   &:hover {
     background-color: #0055aa;
   }
@@ -64,7 +62,7 @@ const ArticleCard = styled.div`
   border-radius: 8px;
   padding: 1.5rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -78,7 +76,7 @@ const ArticleTitle = styled(Link)`
   margin-bottom: 0.5rem;
   color: #333;
   text-decoration: none;
-  
+
   &:hover {
     color: #0066cc;
   }
@@ -96,44 +94,59 @@ const ArticleExcerpt = styled.p`
 `;
 
 const HomePage = () => {
-    const { data: hotArticles, isLoading, error } = useQuery({
-        queryKey: ['hotArticles'],
-        queryFn: fetchHotArticles
-    });
+  const {
+    data: hotArticles,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["hotArticles"],
+    queryFn: fetchHotArticles,
+  });
 
-    return (
-        <HomeContainer>
-            <Hero>
-                <HeroTitle>KUKE 게시판에 오신 것을 환영합니다</HeroTitle>
-                <HeroSubtitle>다양한 주제의 게시글을 둘러보고 의견을 나눠보세요</HeroSubtitle>
-                <Button to="/articles">게시글 둘러보기</Button>
-            </Hero>
+  return (
+    <HomeContainer>
+      <Hero>
+        <HeroTitle>
+          국민대학교 소프트웨어 게시판에 오신 것을 환영합니다
+        </HeroTitle>
+        <HeroSubtitle>
+          국민대학교 소프트웨어 학부 학생들의 다양한 소식을 확인하고
+          공유해보세요.
+        </HeroSubtitle>
+        <Button to="/articles">게시글 둘러보기</Button>
+      </Hero>
 
-            <section>
-                <SectionTitle>인기 게시글</SectionTitle>
-                {isLoading ? (
-                    <p>로딩 중...</p>
-                ) : error ? (
-                    <p>인기 게시글을 불러오는 데 실패했습니다.</p>
-                ) : (
-                    <ArticleGrid>
-                        {hotArticles?.map(article => (
-                            <ArticleCard key={article.id}>
-                                <ArticleTitle to={`/articles/${article.id}`}>{article.title}</ArticleTitle>
-                                <ArticleMeta>
-                                    <span>{article.authorName}</span> ·
-                                    <span>{new Date(article.createdAt).toLocaleDateString()}</span> ·
-                                    <span>조회 {article.viewCount}</span>
-                                </ArticleMeta>
-                                <ArticleExcerpt>{article.content.substring(0, 100)}...</ArticleExcerpt>
-                                <Button to={`/articles/${article.id}`}>자세히 보기</Button>
-                            </ArticleCard>
-                        ))}
-                    </ArticleGrid>
-                )}
-            </section>
-        </HomeContainer>
-    );
+      <section>
+        <SectionTitle>인기 게시글</SectionTitle>
+        {isLoading ? (
+          <p>로딩 중...</p>
+        ) : error ? (
+          <p>인기 게시글을 불러오는 데 실패했습니다.</p>
+        ) : (
+          <ArticleGrid>
+            {hotArticles?.map((article) => (
+              <ArticleCard key={article.id}>
+                <ArticleTitle to={`/articles/${article.id}`}>
+                  {article.title}
+                </ArticleTitle>
+                <ArticleMeta>
+                  <span>{article.authorName}</span> ·
+                  <span>
+                    {new Date(article.createdAt).toLocaleDateString()}
+                  </span>{" "}
+                  ·<span>조회 {article.viewCount}</span>
+                </ArticleMeta>
+                <ArticleExcerpt>
+                  {article.content.substring(0, 100)}...
+                </ArticleExcerpt>
+                <Button to={`/articles/${article.id}`}>자세히 보기</Button>
+              </ArticleCard>
+            ))}
+          </ArticleGrid>
+        )}
+      </section>
+    </HomeContainer>
+  );
 };
 
 export default HomePage;

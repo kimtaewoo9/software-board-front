@@ -1,7 +1,7 @@
 // src/components/Header.jsx
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import styled from "styled-components";
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -17,7 +17,7 @@ const Logo = styled(Link)`
   font-weight: bold;
   color: #333;
   text-decoration: none;
-  
+
   &:hover {
     color: #0066cc;
   }
@@ -32,7 +32,7 @@ const NavLink = styled(Link)`
   color: #555;
   text-decoration: none;
   font-weight: 500;
-  
+
   &:hover {
     color: #0066cc;
   }
@@ -45,7 +45,7 @@ const Button = styled.button`
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  
+
   &:hover {
     background-color: #0055aa;
   }
@@ -53,16 +53,16 @@ const Button = styled.button`
 
 const Header = () => {
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem('token') !== null;
-  
+  const isLoggedIn = localStorage.getItem("token") !== null;
+
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/');
+    localStorage.removeItem("token");
+    navigate("/");
   };
-  
+
   return (
     <HeaderContainer>
-      <Logo to="/">KUKE 게시판</Logo>
+      <Logo to="/">국민대학교 소프트웨어 게시판</Logo>
       <Nav>
         <NavLink to="/">홈</NavLink>
         <NavLink to="/articles">게시글</NavLink>

@@ -1,8 +1,13 @@
 // src/components/CommentSection.jsx
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import styled from 'styled-components';
-import { fetchComments, createComment, updateComment, deleteComment } from '../api/commentApi';
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import styled from "styled-components";
+import {
+  fetchComments,
+  createComment,
+  updateComment,
+  deleteComment,
+} from "../api/commentApi";
 
 const CommentContainer = styled.div`
   margin-top: 2rem;
@@ -38,11 +43,11 @@ const SubmitButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  
+
   &:hover {
     background-color: #0055aa;
   }
-  
+
   &:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
@@ -56,7 +61,7 @@ const CommentList = styled.div`
 const CommentItem = styled.div`
   border-bottom: 1px solid #e9ecef;
   padding: 1rem 0;
-  
+
   &:last-child {
     border-bottom: none;
   }
@@ -96,7 +101,7 @@ const CommentButton = styled.button`
   cursor: pointer;
   padding: 0;
   font-size: 0.85rem;
-  
+
   &:hover {
     color: #0066cc;
     text-decoration: underline;
@@ -108,76 +113,79 @@ const EditForm = styled.div`
 `;
 
 const CommentSection = ({ articleId }) => {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [editingId, setEditingId] = useState(null);
-  const [editContent, setEditContent] = useState('');
+  const [editContent, setEditContent] = useState("");
   const queryClient = useQueryClient();
 
-  const { data: comments, isLoading } = useQuery({
-    queryKey: ['comments', articleId],
-    queryFn: () => fetchComments(articleId)
+  const { data, isLoading } = useQuery({
+    queryKey: ["comments", articleId],
+    queryFn: () => fetchComments(articleId, 1),
   });
 
+  const comments = data?.comments ?? [];
 
   const createMutation = useMutation({
     mutationFn: createComment,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comments', articleId] });
-      setContent('');
-    }
+      queryClient.invalidateQueries({ queryKey: ["comments", articleId] });
+      setContent("");
+    },
   });
 
-  const updateMutation = useMutation(updateComment, {
+  const updateMutation = useMutation({
+    mutationFn: updateComment,
     onSuccess: () => {
-      queryClient.invalidateQueries(['comments', articleId]);
+      queryClient.invalidateQueries({ queryKey: ["comments", articleId] });
       setEditingId(null);
-      setEditContent('');
-    }
+      setEditContent("");
+    },
   });
-  
-  const deleteMutation = useMutation(deleteComment, {
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteComment,
     onSuccess: () => {
-      queryClient.invalidateQueries(['comments', articleId]);
-    }
+      queryClient.invalidateQueries({ queryKey: ["comments", articleId] });
+    },
   });
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!content.trim()) return;
-    
+
     createMutation.mutate({
       articleId,
-      content
+      content,
     });
   };
-  
+
   const handleEdit = (comment) => {
     setEditingId(comment.id);
     setEditContent(comment.content);
   };
-  
+
   const handleUpdate = (e) => {
     e.preventDefault();
     if (!editContent.trim()) return;
-    
+
     updateMutation.mutate({
       id: editingId,
-      content: editContent
+      content: editContent,
     });
   };
-  
+
   const handleDelete = (id) => {
-    if (window.confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
+    if (window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
       deleteMutation.mutate(id);
     }
   };
-  
-  const userId = localStorage.getItem('userId');
-  
+
+  const userId = localStorage.getItem("userId");
+
   return (
     <CommentContainer>
       <CommentTitle>댓글 {comments?.length || 0}개</CommentTitle>
-      
+
       <CommentForm onSubmit={handleSubmit}>
         <TextArea
           placeholder="댓글을 입력하세요"
@@ -185,14 +193,14 @@ const CommentSection = ({ articleId }) => {
           onChange={(e) => setContent(e.target.value)}
           required
         />
-        <SubmitButton 
-          type="submit" 
-          disabled={createMutation.isLoading || !content.trim()}
+        <SubmitButton
+          type="submit"
+          disabled={createMutation.isPending || !content.trim()}
         >
           댓글 작성
         </SubmitButton>
       </CommentForm>
-      
+
       {isLoading ? (
         <p>댓글을 불러오는 중...</p>
       ) : (
@@ -200,13 +208,15 @@ const CommentSection = ({ articleId }) => {
           {comments?.length === 0 ? (
             <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
           ) : (
-            comments?.map(comment => (
+            comments?.map((comment) => (
               <CommentItem key={comment.id}>
                 <CommentHeader>
                   <CommentAuthor>{comment.authorName}</CommentAuthor>
-                  <CommentDate>{new Date(comment.createdAt).toLocaleString()}</CommentDate>
+                  <CommentDate>
+                    {new Date(comment.createdAt).toLocaleString()}
+                  </CommentDate>
                 </CommentHeader>
-                
+
                 {editingId === comment.id ? (
                   <EditForm>
                     <TextArea
@@ -214,21 +224,27 @@ const CommentSection = ({ articleId }) => {
                       onChange={(e) => setEditContent(e.target.value)}
                       required
                     />
-                    <SubmitButton 
+                    <SubmitButton
                       onClick={handleUpdate}
-                      disabled={updateMutation.isLoading || !editContent.trim()}
+                      disabled={updateMutation.isPending || !editContent.trim()}
                     >
                       수정 완료
                     </SubmitButton>
-                    <CommentButton onClick={() => setEditingId(null)}>취소</CommentButton>
+                    <CommentButton onClick={() => setEditingId(null)}>
+                      취소
+                    </CommentButton>
                   </EditForm>
                 ) : (
                   <>
                     <CommentBody>{comment.content}</CommentBody>
                     {userId === String(comment.authorId) && (
                       <CommentActions>
-                        <CommentButton onClick={() => handleEdit(comment)}>수정</CommentButton>
-                        <CommentButton onClick={() => handleDelete(comment.id)}>삭제</CommentButton>
+                        <CommentButton onClick={() => handleEdit(comment)}>
+                          수정
+                        </CommentButton>
+                        <CommentButton onClick={() => handleDelete(comment.id)}>
+                          삭제
+                        </CommentButton>
                       </CommentActions>
                     )}
                   </>

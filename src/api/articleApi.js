@@ -1,53 +1,67 @@
 // src/api/articleApi.js
-import axios from './axiosConfig';
+import axios from "./axiosConfig";
 
 // 게시글 목록 조회
-export const fetchArticles = async (page = 0, size = 10, keyword = '') => {
-  const params = { page, size };
-  if (keyword) params.keyword = keyword;
-  
-  const response = await axios.get('/articles', { params });
-  return response.data;
-};
-
-// 인기 게시글 조회
-export const fetchHotArticles = async () => {
-  const response = await axios.get('/articles/hot');
+export const fetchArticles = async (boardId, page = 0, size = 10) => {
+  const params = { boardId, page, pageSize: size };
+  const response = await axios.get("/v1/articles/source", { params });
   return response.data;
 };
 
 // 단일 게시글 조회
 export const fetchArticleById = async (id) => {
-  const response = await axios.get(`/articles/${id}`);
+  const response = await axios.get(`/v1/articles/${id}/source`);
   return response.data;
 };
 
-// 게시글 생성
-export const createArticle = async (articleData) => {
-  const response = await axios.post('/articles', articleData);
+// 게시글 생성 (백엔드 RequestPart에 맞춰 수정)
+export const createArticle = async (articleData, files) => {
+  const formData = new FormData();
+  formData.append(
+    "request",
+    new Blob([JSON.stringify(articleData)], { type: "application/json" })
+  );
+  if (files && files.length > 0) {
+    files.forEach((file) => formData.append("files", file));
+  }
+
+  const response = await axios.post("/v1/articles", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
-// 게시글 수정
-export const updateArticle = async ({ id, ...articleData }) => {
-  const response = await axios.put(`/articles/${id}`, articleData);
+// 게시글 수정 (백엔드 RequestPart에 맞춰 수정)
+export const updateArticle = async (
+  articleId,
+  articleData,
+  newFiles = [],
+  deletedFileIds = []
+) => {
+  const formData = new FormData();
+  formData.append(
+    "request",
+    new Blob([JSON.stringify(articleData)], { type: "application/json" })
+  );
+  if (newFiles && newFiles.length > 0) {
+    newFiles.forEach((file) => formData.append("newFiles", file));
+  }
+  if (deletedFileIds && deletedFileIds.length > 0) {
+    deletedFileIds.forEach((id) => formData.append("deletedFileIds", id));
+  }
+
+  const response = await axios.put(`/v1/articles/${articleId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
 // 게시글 삭제
 export const deleteArticle = async (id) => {
-  await axios.delete(`/articles/${id}`);
+  await axios.delete(`/v1/articles/${id}`);
   return id;
-};
-
-// 게시글 좋아요
-export const likeArticle = async (id) => {
-  const response = await axios.post(`/articles/${id}/like`);
-  return response.data;
-};
-
-// 게시글 좋아요 취소
-export const unlikeArticle = async (id) => {
-  const response = await axios.delete(`/articles/${id}/like`);
-  return response.data;
 };
