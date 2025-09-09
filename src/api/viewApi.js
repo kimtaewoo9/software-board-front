@@ -2,7 +2,7 @@
 import axios from "./axiosConfig";
 
 // 게시글 조회수 증가
-export const increaseArticleViewCount = async (articleId) => {
+export const increaseArticleViewCount = async (articleId, userId) => {
   await axios.post(`/v1/article-views/articles/${articleId}`);
 };
 

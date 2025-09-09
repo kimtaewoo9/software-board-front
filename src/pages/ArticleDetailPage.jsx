@@ -368,7 +368,7 @@ const ArticleDetailPage = () => {
           </div>
           <ArticleStats>
             <StatItem>
-              <ViewIcon /> {article.viewCount}
+              <ViewIcon /> {article.articleViewCount}
             </StatItem>
             <StatItem>
               <LikeIcon liked={liked} /> {currentLikeCount}

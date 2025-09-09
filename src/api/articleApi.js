@@ -4,13 +4,13 @@ import axios from "./axiosConfig";
 // 게시글 목록 조회
 export const fetchArticles = async (boardId, page = 0, size = 10) => {
   const params = { boardId, page, pageSize: size };
-  const response = await axios.get("/v1/articles/source", { params });
+  const response = await axios.get("/v1/articles", { params });
   return response.data;
 };
 
 // 단일 게시글 조회
 export const fetchArticleById = async (id) => {
-  const response = await axios.get(`/v1/articles/${id}/source`);
+  const response = await axios.get(`/v1/articles/${id}`);
   return response.data;
 };
 
