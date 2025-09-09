@@ -2,9 +2,15 @@
 import axios from "./axiosConfig";
 
 // 게시글 목록 조회
-export const fetchArticles = async (boardId, page = 0, size = 10) => {
-  const params = { boardId, page, pageSize: size };
-  const response = await axios.get("/v1/articles/source", { params });
+export const fetchArticles = async (
+  boardId,
+  page = 0,
+  size = 10,
+  type,
+  keyword
+) => {
+  const params = { boardId, page, pageSize: size, type, keyword };
+  const response = await axios.get("/v1/articles", { params });
   return response.data;
 };
 
@@ -20,7 +26,7 @@ export const fetchArticlesCount = async (boardId) => {
   return response.data;
 };
 
-// 게시글 생성 (백엔드 RequestPart에 맞춰 수정)
+// 게시글 생성
 export const createArticle = async (articleData, files) => {
   const formData = new FormData();
   formData.append(
@@ -39,7 +45,7 @@ export const createArticle = async (articleData, files) => {
   return response.data;
 };
 
-// 게시글 수정
+// 게시글 수정 (백엔드 RequestPart에 맞춰 수정)
 export const updateArticle = async (
   articleId,
   articleData,
