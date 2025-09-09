@@ -3,15 +3,15 @@ import axios from "./axiosConfig";
 
 // 게시글 좋아요
 export const likeArticle = async (articleId) => {
-  const userId = localStorage.getItem("userId");
-  if (!userId) throw new Error("로그인이 필요합니다.");
+  // ✨ userId를 1로 고정
+  const userId = 1;
   await axios.post(`/v1/article-likes/articles/${articleId}/users/${userId}`);
 };
 
 // 게시글 좋아요 취소
 export const unlikeArticle = async (articleId) => {
-  const userId = localStorage.getItem("userId");
-  if (!userId) throw new Error("로그인이 필요합니다.");
+  // ✨ userId를 1로 고정
+  const userId = 1;
   await axios.delete(`/v1/article-likes/articles/${articleId}/users/${userId}`);
 };
 

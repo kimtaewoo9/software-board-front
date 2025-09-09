@@ -106,13 +106,8 @@ const HomePage = () => {
   return (
     <HomeContainer>
       <Hero>
-        <HeroTitle>
-          국민대학교 소프트웨어 게시판에 오신 것을 환영합니다
-        </HeroTitle>
-        <HeroSubtitle>
-          국민대학교 소프트웨어 학부 학생들의 다양한 소식을 확인하고
-          공유해보세요.
-        </HeroSubtitle>
+        <HeroTitle>KMU SOFTWARE BOARD</HeroTitle>
+        <HeroSubtitle>국민대학교 소프트웨어학부 게시판 입니다.</HeroSubtitle>
         <Button to="/articles">게시글 둘러보기</Button>
       </Hero>
 

@@ -120,7 +120,7 @@ const CommentSection = ({ articleId }) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["comments", articleId],
-    queryFn: () => fetchComments(articleId, 1),
+    queryFn: () => fetchComments(articleId),
   });
 
   const comments = data?.comments ?? [];
@@ -160,7 +160,7 @@ const CommentSection = ({ articleId }) => {
   };
 
   const handleEdit = (comment) => {
-    setEditingId(comment.id);
+    setEditingId(comment.commentId); // ✨ comment.id -> comment.commentId
     setEditContent(comment.content);
   };
 
@@ -209,15 +209,16 @@ const CommentSection = ({ articleId }) => {
             <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
           ) : (
             comments?.map((comment) => (
-              <CommentItem key={comment.id}>
+              <CommentItem key={comment.commentId}>
+                {" "}
+                {/* ✨ comment.id -> comment.commentId */}
                 <CommentHeader>
                   <CommentAuthor>{comment.authorName}</CommentAuthor>
                   <CommentDate>
                     {new Date(comment.createdAt).toLocaleString()}
                   </CommentDate>
                 </CommentHeader>
-
-                {editingId === comment.id ? (
+                {editingId === comment.commentId ? ( // ✨ comment.id -> comment.commentId
                   <EditForm>
                     <TextArea
                       value={editContent}
@@ -242,7 +243,11 @@ const CommentSection = ({ articleId }) => {
                         <CommentButton onClick={() => handleEdit(comment)}>
                           수정
                         </CommentButton>
-                        <CommentButton onClick={() => handleDelete(comment.id)}>
+                        <CommentButton
+                          onClick={() => handleDelete(comment.commentId)}
+                        >
+                          {" "}
+                          {/* ✨ comment.id -> comment.commentId */}
                           삭제
                         </CommentButton>
                       </CommentActions>

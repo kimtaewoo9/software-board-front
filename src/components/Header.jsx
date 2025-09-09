@@ -62,7 +62,7 @@ const Header = () => {
 
   return (
     <HeaderContainer>
-      <Logo to="/">국민대학교 소프트웨어 게시판</Logo>
+      <Logo to="/">KMU SOFTWARE</Logo>
       <Nav>
         <NavLink to="/">홈</NavLink>
         <NavLink to="/articles">게시글</NavLink>
